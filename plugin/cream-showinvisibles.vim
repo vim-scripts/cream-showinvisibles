@@ -12,7 +12,7 @@
 " Vim in the vein of Apple and Windows software you already know.
 "
 " Date:    03 Aug 2002
-" Version: 1.0
+" Version: 1.1
 " Source:  http://vim.sourceforge.net/scripts/script.php?script_id=363
 " Author:  Steve Hall  [ digitect@mindspring.com ]
 " License: GPL (http://www.gnu.org/licenses/gpl.html)
@@ -29,7 +29,10 @@
 "
 " ChangeLog:
 "
-" 2002-08-03
+" 2002-08-03 -- v.1.1
+" * New normal mode mapping and slightly saner visual and insert mode mappings.
+"
+" 2002-08-03 -- v.1.0
 " * Initial Release
 
 
@@ -81,6 +84,7 @@ function! List_toggle()
 endfunction
 
 " keyboard shortcut (use Microsoft Windows-like F4)
-imap <silent> <F4> <Esc>:call List_toggle()<CR>a
-vmap <silent> <F4> <Esc>:call List_toggle()<CR>v
+imap <silent> <F4> <C-o>:call List_toggle()<CR>
+vmap <silent> <F4>      :call List_toggle()<CR>gv
+nmap <silent> <F4>      :call List_toggle()<CR>
 
