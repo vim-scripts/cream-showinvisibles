@@ -2,7 +2,7 @@
 " cream-showinvisibles.vim
 " 
 " Cream -- An easy-to-use configuration of the famous Vim text editor
-" [ http://cream.sourceforge.net ] Copyright (C) 2002-2003  Steve Hall
+" [ http://cream.sourceforge.net ] Copyright (C) 2002-2004  Steve Hall
 "
 " License:
 "
@@ -30,17 +30,17 @@
 " retained and initialized across sessions if you use a viminfo, and a
 " familiar (to some of us) keyboard shortcut mapping to F4.
 "
-" This configuration includes characters as nice looking as your
-" specific setup will allow, determined by hardware, operating system
-" and Vim version. (Vim version 6.1.469 supports multi-byte
-" characters, used with UTF-8 encoding.)
+" This configuration includes characters as beautiful as your specific
+" setup will allow, determined by hardware, operating system and Vim
+" version. (Vim version 6.1.469 supports multi-byte characters, used
+" with UTF-8 encoding.)
 "
 " This is one of the many custom utilities and functions for gVim from
 " the Cream project (http://cream.sourceforge.net), a configuration of
 " Vim for those of us familiar with Apple and Windows software. 
 "
-" Updated: 2003 December 14
-" Version: 2.1
+" Updated: 2004 March 20
+" Version: 3.0
 " Source:  http://vim.sourceforge.net/scripts/script.php?script_id=363
 " Author:  Steve Hall  [ digitect@mindspring.com ]
 " License: GPL (http://www.gnu.org/licenses/gpl.html)
@@ -58,6 +58,10 @@
 " and ":help viminfo".
 "
 " ChangeLog:
+"
+" 2004-03-20 -- v.3.0
+" o We no longer guess at encodings. Instead we choose characters on
+"   the basis of whether they are printable or not.
 "
 " 2003-12-13 -- v.2.1
 " o Repair of utf-8 chars for Vim versions >= 6.2.
@@ -101,52 +105,112 @@ endif
 
 " initialize characters used to represent invisibles (global)
 function! Cream_listchars_init()
+" Sets &listchars to sophisticated extended characters as possible.
+" Gracefully falls back to 7-bit ASCII per character if one is not
+" printable.
+"
+" WARNING:
+" Do not try to enter multi-byte characters below, use decimal
+" abstractions only! It's the only way to guarantee that all encodings
+" can edit this file.
 
 	set listchars=
 
-	"**************************************************************
-	"* WARNING:
-	"* Do not try to enter multi-byte characters here, use decimal
-	"* abstractions only! It's the only way to guarantee that all
-	"* encodings can edit this file.
-	"**************************************************************
-
-	if &encoding == "latin1"
-		" decimal 187 followed by a space (032)
+	" tab
+	if     strlen(substitute(strtrans(nr2char(187)), ".", "x", "g")) == 1
+		" right angle quote, guillemotright followed by space (digraph >>)
 		execute "set listchars+=tab:" . nr2char(187) . '\ '
-		" decimal 182
-		execute "set listchars+=eol:" . nr2char(182)
-		" decimal 183
-		execute "set listchars+=trail:" . nr2char(183)
-		" decimal 133 (ellipses )
-		execute "set listchars+=precedes:" . nr2char(133)
-		execute "set listchars+=extends:" . nr2char(133)
-
-	" patch 6.1.469 fixes list with multi-byte chars! (2003-04-16)
-	elseif &encoding == "utf-8" && v:version >=602
-	\|| &encoding == "utf-8" && v:version == 601 && has("patch469")
-		" decimal 187 followed by a space (032)
-		execute "set listchars+=tab:" . nr2char(187) . '\ '
-		" decimal 182
-		execute "set listchars+=eol:" . nr2char(182)
-		" decimal 9642 (digraph sB ▪ )
-		" decimal 9675 (digraph m0 ○ )
-		" decimal 9679 (digraph M0 ● )
-		" decimal 183
-		execute "set listchars+=trail:" . nr2char(183)
-		" decimal 8222 (digraph :9 „ )
-		" decimal 8249 (digraph <1 ‹ )
-		execute "set listchars+=precedes:" . nr2char(8249)
-		" decimal 8250 (digraph >1 › )
-		execute "set listchars+=extends:" . nr2char(8250)
-
 	else
-		set listchars+=tab:>\ 		" decimal 62 followed by a space (032)
-		set listchars+=eol:$		" decimal 36
-		set listchars+=trail:.		" decimal 46
-		set listchars+=precedes:_	" decimal 95
-		set listchars+=extends:_	" decimal 95
+		" greaterthan, followed by space
+		execute "set listchars+=tab:" . nr2char(62) . '\ '
 	endif
+		
+	" eol
+	if     strlen(substitute(strtrans(nr2char(182)), ".", "x", "g")) == 1
+		" paragrah symbol (digraph PI)
+		execute "set listchars+=eol:" . nr2char(182)
+	else
+		" dollar sign
+		execute "set listchars+=eol:" . nr2char(36)
+	endif
+
+	" trail
+	if     strlen(substitute(strtrans(nr2char(149)), ".", "x", "g")) == 1
+		" middle dot (digraph sB)
+		execute "set listchars+=trail:" . nr2char(183)
+	else
+		" period
+		execute "set listchars+=trail:" . nr2char(46)
+	endif
+
+	" precedes
+	if     strlen(substitute(strtrans(nr2char(133)), ".", "x", "g")) == 1
+		" ellipses
+		execute "set listchars+=precedes:" . nr2char(133)
+	elseif strlen(substitute(strtrans(nr2char(8249)), ".", "x", "g")) == 1
+		" mathematical lessthan (digraph <1)
+		execute "set listchars+=precedes:" . nr2char(8249)
+	elseif strlen(substitute(strtrans(nr2char(8592)), ".", "x", "g")) == 1
+		" left arrow  (digraph <-)
+		execute "set listchars+=precedes:" . nr2char(8592)
+	else
+		" underscore
+		execute "set listchars+=precedes:" . nr2char(95)
+	endif
+
+	" extends
+	if     strlen(substitute(strtrans(nr2char(133)), ".", "x", "g")) == 1
+		" ellipses
+		execute "set listchars+=extends:" . nr2char(133)
+	elseif strlen(substitute(strtrans(nr2char(8250)), ".", "x", "g")) == 1
+		" mathematical greaterthan (digraph >1)
+		execute "set listchars+=extends:" . nr2char(8250)
+	elseif strlen(substitute(strtrans(nr2char(8594)), ".", "x", "g")) == 1
+		" right arrow (digraph ->)
+		execute "set listchars+=precedes:" . nr2char(8594)
+	else
+		" underscore
+		execute "set listchars+=extends:" . nr2char(95)
+	endif
+
+
+	"if &encoding == "latin1"
+	"    " decimal 187 followed by a space (032)
+	"    execute "set listchars+=tab:" . nr2char(187) . '\ '
+	"    " decimal 182
+	"    execute "set listchars+=eol:" . nr2char(182)
+	"    " decimal 183
+	"    execute "set listchars+=trail:" . nr2char(183)
+	"    " decimal 133 (ellipses Â)
+	"    execute "set listchars+=precedes:" . nr2char(133)
+	"    execute "set listchars+=extends:" . nr2char(133)
+	"
+	"" patch 6.1.469 fixes list with multi-byte chars! (2003-04-16)
+	"elseif &encoding == "utf-8" && v:version >=602
+	"\|| &encoding == "utf-8" && v:version == 601 && has("patch469")
+	"    " decimal 187 followed by a space (032)
+	"    execute "set listchars+=tab:" . nr2char(187) . '\ '
+	"    " decimal 182
+	"    execute "set listchars+=eol:" . nr2char(182)
+	"    " decimal 9642 (digraph sB âª )
+	"    " decimal 9675 (digraph m0 â )
+	"    " decimal 9679 (digraph M0 â )
+	"    " decimal 183
+	"    execute "set listchars+=trail:" . nr2char(183)
+	"    " decimal 8222 (digraph :9 â )
+	"    " decimal 8249 (digraph <1 â¹ )
+	"    execute "set listchars+=precedes:" . nr2char(8249)
+	"    " decimal 8250 (digraph >1 âº )
+	"    execute "set listchars+=extends:" . nr2char(8250)
+	"
+	"else
+	"    set listchars+=tab:>\ 		" decimal 62 followed by a space (032)
+	"    set listchars+=eol:$		" decimal 36
+	"    set listchars+=trail:.		" decimal 46
+	"    set listchars+=precedes:_	" decimal 95
+	"    set listchars+=extends:_	" decimal 95
+	"endif
+
 endfunction
 call Cream_listchars_init()
 
