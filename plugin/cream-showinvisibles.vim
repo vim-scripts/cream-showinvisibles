@@ -40,7 +40,7 @@
 " Vim for those of us familiar with Apple and Windows software. 
 "
 " Updated: 2004 March 20
-" Version: 3.0
+" Version: 3.01
 " Source:  http://vim.sourceforge.net/scripts/script.php?script_id=363
 " Author:  Steve Hall  [ digitect@mindspring.com ]
 " License: GPL (http://www.gnu.org/licenses/gpl.html)
@@ -58,6 +58,9 @@
 " and ":help viminfo".
 "
 " ChangeLog:
+"
+" 2004-03-20 -- v.3.01
+" o Fixed typos in trail multi-byte test and extends definitions.
 "
 " 2004-03-20 -- v.3.0
 " o We no longer guess at encodings. Instead we choose characters on
@@ -135,8 +138,9 @@ function! Cream_listchars_init()
 	endif
 
 	" trail
-	if     strlen(substitute(strtrans(nr2char(149)), ".", "x", "g")) == 1
-		" middle dot (digraph sB)
+	if     strlen(substitute(strtrans(nr2char(183)), ".", "x", "g")) == 1
+		" others digraphs: 0U 0M/M0 sB .M 0m/m0 RO
+		" middle dot (digraph .M)
 		execute "set listchars+=trail:" . nr2char(183)
 	else
 		" period
@@ -167,7 +171,7 @@ function! Cream_listchars_init()
 		execute "set listchars+=extends:" . nr2char(8250)
 	elseif strlen(substitute(strtrans(nr2char(8594)), ".", "x", "g")) == 1
 		" right arrow (digraph ->)
-		execute "set listchars+=precedes:" . nr2char(8594)
+		execute "set listchars+=extends:" . nr2char(8594)
 	else
 		" underscore
 		execute "set listchars+=extends:" . nr2char(95)
