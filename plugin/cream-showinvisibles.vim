@@ -39,8 +39,8 @@
 " the Cream project (http://cream.sourceforge.net), a configuration of
 " Vim for those of us familiar with Apple and Windows software. 
 "
-" Updated: 2003 April 17
-" Version: 2.0
+" Updated: 2003 December 14
+" Version: 2.1
 " Source:  http://vim.sourceforge.net/scripts/script.php?script_id=363
 " Author:  Steve Hall  [ digitect@mindspring.com ]
 " License: GPL (http://www.gnu.org/licenses/gpl.html)
@@ -59,6 +59,13 @@
 "
 " ChangeLog:
 "
+" 2003-12-13 -- v.2.1
+" o Repair of utf-8 chars for Vim versions >= 6.2.
+" o Addition of mappings and autocmd for use outside of Cream.
+" o Renamed functions:
+"   * List_init()             =>  Cream_list_init()
+"   * List_toggle()           =>  Cream_list_toggle()
+"
 " 2003-04-17 -- v.2.0
 " o New multi-byte sets, contingent upon Vim version 6.1.469+. Note
 "   that your particular OS and Font capabilities impact the display
@@ -76,58 +83,75 @@
 "
 " 2002-08-03 -- v.1.0
 " o Initial Release
-
-
-" characters used to represent invisibles
-set listchars=
-
-"*********************************************************************
-" WARNING:
-" Do not try to enter multi-byte characters below, use decimal
-" abstractions only! It's the only way to guarantee that all encodings
-" can edit this file.
 "
-if &encoding == "latin1"
-	" decimal 187 followed by a space (032)
-	execute "set listchars+=tab:" . nr2char(187) . '\ '
-	" decimal 182
-	execute "set listchars+=eol:" . nr2char(182)
-	" decimal 183
-	execute "set listchars+=trail:" . nr2char(183)
-	" decimal 133 (ellipses )
-	execute "set listchars+=precedes:" . nr2char(133)
-	execute "set listchars+=extends:" . nr2char(133)
 
-" patch 6.1.469 fixes list with multi-byte chars! (2003-04-16)
-elseif &encoding == "utf-8"
-\&& v:version >= 601
-\&& has("patch469")
-	" decimal 187 followed by a space (032)
-	execute "set listchars+=tab:" . nr2char(187) . '\ '
-	" decimal 182
-	execute "set listchars+=eol:" . nr2char(182)
-	" decimal 9642 (digraph sB ▪ )
-	" decimal 9675 (digraph m0 ○ )
-	" decimal 9679 (digraph M0 ● )
-	" decimal 183
-	execute "set listchars+=trail:" . nr2char(183)
-	" decimal 8222 (digraph :9 „ )
-	" decimal 8249 (digraph <1 ‹ )
-	execute "set listchars+=precedes:" . nr2char(8249)
-	" decimal 8250 (digraph >1 › )
-	execute "set listchars+=extends:" . nr2char(8250)
+" don't load mappings or autocmd if used with Cream (elsewhere)
+if !exists("$CREAM")
 
-else
-	set listchars+=tab:>\ 		" decimal 62 followed by a space (032)
-	set listchars+=eol:$		" decimal 36
-	set listchars+=trail:.		" decimal 46
-	set listchars+=precedes:_	" decimal 95
-	set listchars+=extends:_	" decimal 95
+	" mappings
+	imap <silent> <F4> <C-o>:call Cream_list_toggle("i")<CR>
+	vmap <silent> <F4> :<C-u>call Cream_list_toggle("v")<CR>
+	nmap <silent> <F4>      :call Cream_list_toggle("n")<CR>
+
+	" initialize on Buffer enter/new
+	autocmd BufNewFile,BufEnter * call Cream_list_init()
+
 endif
-"*********************************************************************
 
-" initialize environment
-function! List_init()
+
+" initialize characters used to represent invisibles (global)
+function! Cream_listchars_init()
+
+	set listchars=
+
+	"**************************************************************
+	"* WARNING:
+	"* Do not try to enter multi-byte characters here, use decimal
+	"* abstractions only! It's the only way to guarantee that all
+	"* encodings can edit this file.
+	"**************************************************************
+
+	if &encoding == "latin1"
+		" decimal 187 followed by a space (032)
+		execute "set listchars+=tab:" . nr2char(187) . '\ '
+		" decimal 182
+		execute "set listchars+=eol:" . nr2char(182)
+		" decimal 183
+		execute "set listchars+=trail:" . nr2char(183)
+		" decimal 133 (ellipses )
+		execute "set listchars+=precedes:" . nr2char(133)
+		execute "set listchars+=extends:" . nr2char(133)
+
+	" patch 6.1.469 fixes list with multi-byte chars! (2003-04-16)
+	elseif &encoding == "utf-8" && v:version >=602
+	\|| &encoding == "utf-8" && v:version == 601 && has("patch469")
+		" decimal 187 followed by a space (032)
+		execute "set listchars+=tab:" . nr2char(187) . '\ '
+		" decimal 182
+		execute "set listchars+=eol:" . nr2char(182)
+		" decimal 9642 (digraph sB ▪ )
+		" decimal 9675 (digraph m0 ○ )
+		" decimal 9679 (digraph M0 ● )
+		" decimal 183
+		execute "set listchars+=trail:" . nr2char(183)
+		" decimal 8222 (digraph :9 „ )
+		" decimal 8249 (digraph <1 ‹ )
+		execute "set listchars+=precedes:" . nr2char(8249)
+		" decimal 8250 (digraph >1 › )
+		execute "set listchars+=extends:" . nr2char(8250)
+
+	else
+		set listchars+=tab:>\ 		" decimal 62 followed by a space (032)
+		set listchars+=eol:$		" decimal 36
+		set listchars+=trail:.		" decimal 46
+		set listchars+=precedes:_	" decimal 95
+		set listchars+=extends:_	" decimal 95
+	endif
+endfunction
+call Cream_listchars_init()
+
+" initialize environment on BufEnter (local)
+function! Cream_list_init()
 	if !exists("g:LIST")
 		" initially off
 		set nolist
@@ -142,7 +166,7 @@ function! List_init()
 endfunction
 
 " toggle on/off
-function! List_toggle(mode)
+function! Cream_list_toggle(mode)
 	if exists("g:LIST")
 		if g:LIST == 0
 			set list
@@ -153,7 +177,7 @@ function! List_toggle(mode)
 		endif
 	else
 		call confirm(
-		\"Error: global uninitialized in List_toggle()", "&Ok", 1, "Error")
+		\"Error: global uninitialized in Cream_list_toggle()", "&Ok", 1, "Error")
 	endif
 	if a:mode == "v"
 		normal gv
